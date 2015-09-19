@@ -1,3 +1,30 @@
+# HathiTrust
+
+This is a minor fork of Andrew Goldstone's [dfrtopics](https://github.com/agoldst/dfrtopics) that adds some functions to handle the HathiTrust data released by [Ted Underwood](http://sharc.hathitrust.org/genre).
+
+Assuming that you have "fiction-metadata.csv" and "tsv" as the metadata file and data directory, respectively, you can create a model with:
+
+```R
+m <- model_hathi_documents("fiction-metadata.csv", "tsv", stoplist_file="stopwords.txt", n_topics=200)
+```
+
+You would also need a "stopwords.txt" file in the same directory. The HathiTrust files are generally quite large, so I recommend using at least this much memory before you load the library:
+
+```R
+options(java.parameters="-Xmx4g")
+```
+
+(Doubling that if you have the memory might not be a bad idea.) After you have created the model, you can export it for Andrew Goldstone's [dfrbrowser](https://github.com/agoldst/dfr-browser) with the following:
+
+```R
+export_ht_browser_data(m, out_dir="data")
+```
+
+
+Some tweaks are necessary to get the browser to display the Hathi metadata correctly, and I will release those soon.
+
+It's quite possible that the changes I have made here will cause this code to break in unknown, unknowable, and perhaps spectacular ways, so please use with caution.
+
 # dfrtopics
 
 This small R package provides bits and pieces to help make and explore topic models of text, especially word-count data like that available from JSTOR's [Data for Research](http://dfr.jstor.org) (DfR) service. It uses [MALLET](http://mallet.cs.umass.edu) to run the models.
@@ -13,6 +40,13 @@ This is too messy for CRAN. The easiest way to install is to first install the [
 ```R
 library(devtools)
 install_github("agoldst/dfrtopics")
+```
+
+(To install this version, use:)
+
+```R
+library(devtools)
+install_github("joncgoodwin/dfrtopics")
 ```
 
 (This should work even if you don't have git or a github account.)
