@@ -54,6 +54,62 @@ model_dfr_documents <- function(
                 ...)
 }
 
+# Core dfrtopics functions: running MALLET and extracting document-topic
+# and topic-word information.
+
+#' Make a topic model of HathiTrust documents
+#'
+#' The basic usage of this package is wrapped up in this convenience function.
+#'
+#' Given wordcount and metadata files, this function sets up MALLET inputs and
+#' then runs MALLET to produce a topic model. Normally you will want
+#' finer-grained control over the mallet inputs and modeling parameters. The
+#' steps for that process are described in the package vignette. Once the model
+#' has been trained, the results can be saved to disk with
+#' \code{\link{write_mallet_model}}
+#'
+#' If java gives out-of-memory errors, try increasing the Java heap size to a
+#' large value, like 4GB, by setting \code{options(java.parameters="-Xmx4g")}
+#' \emph{before} loading this package (or rJava).
+#'
+#'
+#' @param citations_files character vector with names of DfR
+#'   \code{citations.CSV} or \code{citations.tsv} metadata files files
+#' @param wordcounts_dirs character vector with names of directories holding
+#'   \code{wordcounts*.CSV} files
+#' @param stoplist_file name of stoplist file (containing one stopword per line)
+#' @param n_topics number of topics to model
+#' @param ... passed on to \code{\link{train_model}}
+#'
+#' @return a \code{\link{mallet_model}} object holding the results
+#'
+#' @seealso This function simply calls in sequence
+#'   \code{\link{read_dfr_metadata}}, \code{\link{read_wordcounts}},
+#'   \code{\link{wordcounts_texts}}, \code{\link{make_instances}}, and
+#'   \code{\link{train_model}}. To write results to disk, use
+#'   \code{\link{write_mallet_model}}
+#'
+#' @examples
+#' # Make a 50-topic model of documents in the wordcounts folder
+#' \dontrun{model_dfr_documents("citations.CSV", "wordcounts", 50)}
+#'
+#' @export
+#'
+model_hathi_documents <- function(
+        citations_files,
+        wordcounts_dirs,
+        n_topics,
+        stoplist_file=file.path(path.package("dfrtopics"),
+                                "stoplist", "stoplist.txt"),
+        ...)  {
+    result <- read_wordcounts_hathi(list.files(wordcounts_dirs, full.names=T))
+    result <- wordcounts_texts(result)
+    result <- make_instances(result, stoplist_file)
+    train_model(result, n_topics,
+                metadata=read_hathi_metadata(citations_files),
+                ...)
+}
+
 #' A convenience function for saving all the model outputs at once.
 #'
 #' Save a series of files with the results of an LDA run. By default this will produce a number of files, including several large ones.
@@ -749,7 +805,7 @@ metadata.mallet_model <- function (m) m$metadata
 # utility function for ensuring metadata rows match and are in same order
 # as doc-topic matrix
 match_metadata <- function (meta, ids) {
-    i <- match(ids, meta$id)
+    i <- match(ids, meta$htid)
     if (any(is.na(i))) {
         NULL
     } else {
@@ -1220,5 +1276,3 @@ Otherwise, the dplyr manipulation in memory is up to you."
         metadata=meta
     )
 }
-
-

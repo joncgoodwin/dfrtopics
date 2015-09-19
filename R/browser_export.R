@@ -167,9 +167,10 @@ Set overwrite=TRUE to overwrite existing files."
               overwrite=overwrite)
 
     md_frame <- metadata(m)
-    drops <- match(c("publisher", "reviewed.work", "doi"),
-                   names(md_frame))
-    md_frame <- md_frame[ , -drops]
+    #the code below to drop unnecessary columns is not working: fix
+    #drops <- match(c("oclc", "locnum", "imprint","enumcron", "subjects", "prob80precise", "genrepages", "totalpages", "englishpct", "datetype", "startdate", "enddate", "imprintdate"),
+    #               names(md_frame))
+    #md_frame <- md_frame[ , -drops]
 
     write_zip(function (f) {
         write.table(md_frame,f,
@@ -211,4 +212,3 @@ Set overwrite=TRUE to overwrite existing files."
         message(info_file, " was missing. A stub file has been created.")
     }
 }
-
